@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from vnstock import *
 import json
+from openpyxl import load_workbook
 
 # Read the CSV file
 df = pd.read_csv("vn_stock_companies.csv")
@@ -107,3 +108,20 @@ df = pd.DataFrame(financial_data)
 
 # Write the DataFrame to a CSV file
 df.to_csv("financial_data.csv", index=False)
+
+# Load the existing workbook
+book = load_workbook('stock-valuation-2022.xlsx')
+# Create an Excel writer object with the loaded workbook
+writer = pd.ExcelWriter('stock-valuation-2022.xlsx', engine='openpyxl') 
+writer.book = book
+
+# Delete the 'financial_data' sheet if it exists
+if 'financial_data' in book.sheetnames:
+    std = book['financial_data']
+    book.remove(std)
+
+# Write the DataFrame to the 'financial_data' sheet
+df.to_excel(writer, sheet_name='financial_data', index=False)
+
+# Save the workbook
+writer.save()
