@@ -21,6 +21,7 @@ financial_data = []  # List to store the financial data objects
 for symbol in filtered_symbollist:
     net_income = {}
     compound_rate = {}
+    dividend_yield = 0.0  # Default value for dividend_yield
     try:
         data = financial_report(
             symbol=symbol, report_type="IncomeStatement", frequency="Yearly"
@@ -67,8 +68,11 @@ for symbol in filtered_symbollist:
             if not np.isnan(average_roe):
                 final_average_roe = average_roe
 
-        # Get latest Price to Earning ratio
+        # Get latest Price to Earning ratio and dividend yield
         pe = df.loc[0, "priceToEarning"]
+
+        dividend_yield = df.loc[0, "dividend"]
+            
     except Exception as e:
         print(f"Error fetching data for symbol {symbol} in financial_ratio: {str(e)}")
 
@@ -79,6 +83,7 @@ for symbol in filtered_symbollist:
             "compound_rate": compound_rate,
             "average_5y_roe": final_average_roe,
             "pe": pe,
+            "dividend_yield": dividend_yield,
         }
     )
 
@@ -109,19 +114,21 @@ df = pd.DataFrame(financial_data)
 # Write the DataFrame to a CSV file
 df.to_csv("financial_data.csv", index=False)
 
-# Load the existing workbook
-book = load_workbook('stock-valuation-2022.xlsx')
-# Create an Excel writer object with the loaded workbook
-writer = pd.ExcelWriter('stock-valuation-2022.xlsx', engine='openpyxl') 
-writer.book = book
+# Replacing the financial_data sheet in the excel. Removed for now.
 
-# Delete the 'financial_data' sheet if it exists
-if 'financial_data' in book.sheetnames:
-    std = book['financial_data']
-    book.remove(std)
+# # Load the existing workbook
+# book = load_workbook('stock-valuation-2023.xlsx')
+# # Create an Excel writer object with the loaded workbook
+# writer = pd.ExcelWriter('stock-valuation-2023.xlsx', engine='openpyxl') 
+# writer.book = book
 
-# Write the DataFrame to the 'financial_data' sheet
-df.to_excel(writer, sheet_name='financial_data', index=False)
+# # Delete the 'financial_data' sheet if it exists
+# if 'financial_data' in book.sheetnames:
+#     std = book['financial_data']
+#     book.remove(std)
 
-# Save the workbook
-writer.save()
+# # Write the DataFrame to the 'financial_data' sheet
+# df.to_excel(writer, sheet_name='financial_data', index=False)
+
+# # Save the workbook
+# writer.save()
