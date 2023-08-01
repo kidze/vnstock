@@ -114,8 +114,8 @@ df = pd.DataFrame(financial_data)
 # Write the DataFrame to a CSV file
 df.to_csv("financial_data.csv", index=False)
 
-# Replacing the financial_data sheet in the excel. Removed for now.
 
+# ########################## Replacing the financial_data sheet in the excel. Removed for now.
 # # Load the existing workbook
 # book = load_workbook('stock-valuation-2023.xlsx')
 # # Create an Excel writer object with the loaded workbook
