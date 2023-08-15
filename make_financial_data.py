@@ -59,6 +59,7 @@ for symbol in filtered_symbollist:
 
     final_average_roe = 0.0
     pe = None
+    debtOnCapital = None
     try:
         # Calculate average 5 year ROE
         df = financial_ratio(symbol, "yearly", True)
@@ -68,10 +69,14 @@ for symbol in filtered_symbollist:
             if not np.isnan(average_roe):
                 final_average_roe = average_roe
 
-        # Get latest Price to Earning ratio and dividend yield
+        # Get latest Price to Earning ratio and dividend yield and Debt On Capital from Debt on Equity
         pe = df.loc[0, "priceToEarning"]
 
         dividend_yield = df.loc[0, "dividend"]
+        
+        debtOnEquity = df.loc[0, "debtOnEquity"]
+        if debtOnEquity is not None:
+            debtOnCapital = debtOnEquity/(debtOnEquity + 1)
             
     except Exception as e:
         print(f"Error fetching data for symbol {symbol} in financial_ratio: {str(e)}")
@@ -84,6 +89,7 @@ for symbol in filtered_symbollist:
             "average_5y_roe": final_average_roe,
             "pe": pe,
             "dividend_yield": dividend_yield,
+            "debtOnCapital": debtOnCapital,
         }
     )
 
