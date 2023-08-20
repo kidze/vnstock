@@ -21,7 +21,14 @@ financial_data = []  # List to store the financial data objects
 for symbol in filtered_symbollist:
     net_income = {}
     compound_rate = {}
+    industry = ""
     dividend_yield = 0.0  # Default value for dividend_yield
+    try:
+        overview = company_overview(symbol)
+        industry = overview.loc[0, "industry"]
+    except Exception as e:
+        print(f"Error fetching data for symbol {symbol} in company_overview: {str(e)}")
+        
     try:
         data = financial_report(
             symbol=symbol, report_type="IncomeStatement", frequency="Yearly"
@@ -86,6 +93,7 @@ for symbol in filtered_symbollist:
     financial_data.append(
         {
             "ticker": symbol,
+            "industry": industry,
             "net_income": net_income,
             "compound_rate": compound_rate,
             "average_5y_roc": final_average_roc,
