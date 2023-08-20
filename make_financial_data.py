@@ -58,6 +58,7 @@ for symbol in filtered_symbollist:
         print(f"Error fetching data for symbol {symbol} in financial_report: {str(e)}")
 
     final_average_roe = 0.0
+    final_average_roc = 0.0
     pe = None
     debtOnCapital = None
     try:
@@ -77,6 +78,7 @@ for symbol in filtered_symbollist:
         debtOnEquity = df.loc[0, "debtOnEquity"]
         if debtOnEquity is not None:
             debtOnCapital = debtOnEquity/(debtOnEquity + 1)
+            final_average_roc = final_average_roe*(1-debtOnCapital)
             
     except Exception as e:
         print(f"Error fetching data for symbol {symbol} in financial_ratio: {str(e)}")
@@ -86,6 +88,7 @@ for symbol in filtered_symbollist:
             "ticker": symbol,
             "net_income": net_income,
             "compound_rate": compound_rate,
+            "average_5y_roc": final_average_roc,
             "average_5y_roe": final_average_roe,
             "pe": pe,
             "dividend_yield": dividend_yield,
@@ -100,10 +103,10 @@ for entry in financial_data:
     average_5y_compound_rate = sum(compound_rates[year] for year in latest_years) / 5
     entry["average_5y_compound_rate"] = average_5y_compound_rate
 
-# sort financial_data based on the highest roe and average_5y_compound_rate
+# sort financial_data based on the highest roc and average_5y_compound_rate
 financial_data = sorted(
     financial_data,
-    key=lambda x: (x["average_5y_roe"], x["average_5y_compound_rate"]),
+    key=lambda x: (x["average_5y_roc"], x["average_5y_compound_rate"]),
     reverse=True,
 )
 
