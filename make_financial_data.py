@@ -28,39 +28,56 @@ for symbol in filtered_symbollist:
         industry = overview.loc[0, "industry"]
     except Exception as e:
         print(f"Error fetching data for symbol {symbol} in company_overview: {str(e)}")
-        
+
     try:
-        data = financial_report(
-            symbol=symbol, report_type="IncomeStatement", frequency="Yearly"
-        )
+        # data = financial_report(
+        #     symbol=symbol, report_type="IncomeStatement", frequency="Yearly"
+        # )
 
-        # Remove the 'Q5 ' from years
-        data.columns = [col.replace("Q5 ", "") for col in data.columns]
+        # # Remove the 'Q5 ' from years
+        # data.columns = [col.replace("Q5 ", "") for col in data.columns]
 
-        # Find the row index where "CHỈ TIÊU" matches one of the three values
-        row_index = data[
-            data["CHỈ TIÊU"].str.contains(
-                "Lợi nhuận của Cổ đông của Công ty mẹ|Lợi nhuận sau thuế của chủ sở hữu, tập đoàn|Lợi nhuận sau thuế phân bổ cho chủ sở hữu|Lợi nhuận sau thuế"
-            )
-        ].index[0]
+        # # Find the row index where "CHỈ TIÊU" matches one of the three values
+        # row_index = data[
+        #     data["CHỈ TIÊU"].str.contains(
+        #         "Lợi nhuận của Cổ đông của Công ty mẹ|Lợi nhuận sau thuế của chủ sở hữu, tập đoàn|Lợi nhuận sau thuế phân bổ cho chủ sở hữu|Lợi nhuận sau thuế"
+        #     )
+        # ].index[0]
 
-        # Use the row index to get the net income data
-        net_income = data.loc[row_index].to_dict()
+        # # Use the row index to get the net income data
+        # net_income = data.loc[row_index].to_dict()
 
-        # Remove the first entry in the dictionary
-        del net_income["CHỈ TIÊU"]
+        # # Remove the first entry in the dictionary
+        # del net_income["CHỈ TIÊU"]
+        # years = list(net_income.keys())[5:]
 
-        years = list(net_income.keys())[5:]
-        compound_rate = {}
+        # compound_rate = {}
 
-        for year in years:
+        # for year in years:
+        #     year_int = int(year)
+        #     sum_net_income_5_years = sum(
+        #         net_income[str(y)] for y in range(year_int - 5, year_int)
+        #     )
+        #     compound_rate[year] = (
+        #         net_income[year] - net_income[str(year_int - 5)]
+        #     ) / sum_net_income_5_years
+            
+        data = financial_flow(symbol=symbol, report_type="incomestatement", report_range="yearly")
+        data.index = data.index.str.replace("-Q5", "")
+        
+        net_income_column = 'postTaxProfit'  # Update with the actual column name
+                
+        for year in data.index:
             year_int = int(year)
-            sum_net_income_5_years = sum(
-                net_income[str(y)] for y in range(year_int - 5, year_int)
-            )
-            compound_rate[year] = (
-                net_income[year] - net_income[str(year_int - 5)]
-            ) / sum_net_income_5_years
+            net_income[year] = data.loc[year, net_income_column]
+            if str(year_int - 5) in data.index:
+                sum_net_income_5_years = sum(data.loc[str(y), net_income_column] for y in range(year_int - 5, year_int))
+                if sum_net_income_5_years != 0:
+                    compound_rate[year] = (data.loc[year, net_income_column] - data.loc[str(year_int - 5), net_income_column]) / sum_net_income_5_years
+                else:
+                    compound_rate[year] = 0  # Set compound rate to zero or another value if appropriate
+
+        
     except Exception as e:
         print(f"Error fetching data for symbol {symbol} in financial_report: {str(e)}")
 
@@ -82,12 +99,12 @@ for symbol in filtered_symbollist:
         pe = df.loc[0, "priceToEarning"]
 
         dividend_yield = df.loc[0, "dividend"]
-        
+
         debtOnEquity = df.loc[0, "debtOnEquity"]
         if debtOnEquity is not None:
-            debtOnCapital = debtOnEquity/(debtOnEquity + 1)
-            final_average_roc = final_average_roe*(1-debtOnCapital)
-            
+            debtOnCapital = debtOnEquity / (debtOnEquity + 1)
+            final_average_roc = final_average_roe * (1 - debtOnCapital)
+
     except Exception as e:
         print(f"Error fetching data for symbol {symbol} in financial_ratio: {str(e)}")
 
@@ -124,7 +141,7 @@ file_path = "financial_data.json"
 
 # Write financial_data to the file in JSON format
 with open(file_path, "w") as file:
-    json.dump(financial_data, file)
+    json.dump(financial_data, file, default=str)
 
 # Assuming financial_data is a dictionary
 df = pd.DataFrame(financial_data)
@@ -137,7 +154,7 @@ df.to_csv("financial_data.csv", index=False)
 # # Load the existing workbook
 # book = load_workbook('stock-valuation-2023.xlsx')
 # # Create an Excel writer object with the loaded workbook
-# writer = pd.ExcelWriter('stock-valuation-2023.xlsx', engine='openpyxl') 
+# writer = pd.ExcelWriter('stock-valuation-2023.xlsx', engine='openpyxl')
 # writer.book = book
 
 # # Delete the 'financial_data' sheet if it exists
