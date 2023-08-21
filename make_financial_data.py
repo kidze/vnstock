@@ -94,6 +94,11 @@ for symbol in filtered_symbollist:
             ema_roe = df["roe"].head(5).ewm(span=3, adjust=False).mean()
             if not np.isnan(ema_roe.iloc[-1]):
                 final_average_roe = ema_roe.iloc[-1]
+        else:
+            average_roe = df["roe"].mean()
+            ema_roe = df["roe"].ewm(span=len(df), adjust=False).mean()
+            if not np.isnan(ema_roe.iloc[-1]):
+                final_average_roe = ema_roe.iloc[-1]
 
         # Get latest Price to Earning ratio and dividend yield and Debt On Capital from Debt on Equity
         pe = df.loc[0, "priceToEarning"]
