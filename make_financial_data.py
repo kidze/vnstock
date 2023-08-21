@@ -130,8 +130,17 @@ for symbol in filtered_symbollist:
 # Process financial_data to calculate average_5y_compound_rate
 for entry in financial_data:
     compound_rates = entry["compound_rate"]
-    latest_years = list(compound_rates.keys())[-5:]
-    average_5y_compound_rate = sum(compound_rates[year] for year in latest_years) / 5
+    available_years = list(compound_rates.keys())
+    if len(available_years) >= 5:
+        latest_years = list(compound_rates.keys())[-5:]
+        average_5y_compound_rate = sum(compound_rates[year] for year in latest_years) / 5
+    else:
+        available_rates = [compound_rates[year] for year in available_years]
+        if len(available_rates) > 0:
+            average_5y_compound_rate = sum(available_rates) / len(available_rates)
+        else:
+            average_5y_compound_rate = 0  # Set a default value when there's no data
+    
     entry["average_5y_compound_rate"] = average_5y_compound_rate
 
 # sort financial_data based on the highest roc and average_5y_compound_rate
