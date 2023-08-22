@@ -132,7 +132,7 @@ for entry in financial_data:
     compound_rates = entry["compound_rate"]
     available_years = list(compound_rates.keys())
     if len(available_years) >= 5:
-        latest_years = list(compound_rates.keys())[-5:]
+        latest_years = list(compound_rates.keys())[:5]
         average_5y_compound_rate = sum(compound_rates[year] for year in latest_years) / 5
     else:
         available_rates = [compound_rates[year] for year in available_years]
