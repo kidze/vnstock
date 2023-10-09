@@ -101,7 +101,9 @@ for symbol in filtered_symbollist:
                 final_average_roe = ema_roe.iloc[-1]
 
         # Get latest Price to Earning ratio and dividend yield and Debt On Capital from Debt on Equity
-        pe = df.loc[0, "priceToEarning"]
+        # pe ratio is taken from financial_ratio quarterly
+        df_quarterly = financial_ratio(symbol, "quarterly", False)
+        pe = df_quarterly.loc[0, "priceToEarning"]
 
         dividend_yield = df.loc[0, "dividend"]
 
