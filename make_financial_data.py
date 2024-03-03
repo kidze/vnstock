@@ -19,7 +19,48 @@ filtered_symbollist = [symbol for symbol in symbollist if len(symbol) <= 4]
 financial_data = []  # List to store the financial data objects
 
 # Limit the number of stocks
-filtered_symbollist = ['VIC','CTS','VPG','DGC','DHC','DGW','DGC','HPG','CTR','VCS','CAP','RAL','DHA','FPT','TCB','FTS','VIX','VTP']
+filtered_symbollist = [
+    "VIC",
+    "CTS",
+    "VPG",
+    "DGC",
+    "DHC",
+    "DGW",
+    "HPG",
+    "CTR",
+    "VCS",
+    "CAP",
+    "RAL",
+    "DHA",
+    "FPT",
+    "TCB",
+    "FTS",
+    "VIX",
+    "VTP",
+    "AGR",
+    "APG",
+    "APS",
+    "BSI",
+    "BVS",
+    "EVS",
+    "HBS",
+    "HCM",
+    "IVS",
+    "MBS",
+    "ORS",
+    "PSI",
+    "SHS",
+    "SSI",
+    "TCI",
+    "TVB",
+    "TVS",
+    "VCI",
+    "VDS",
+    "VFS",
+    "VIG",
+    "VND",
+    "WSS",
+]
 
 for symbol in filtered_symbollist:
     net_income = {}
