@@ -104,8 +104,8 @@ for symbol in filtered_symbollist:
     except Exception as e:
         print(f"Error fetching data for symbol {symbol} in financial_report: {str(e)}")
 
-    final_average_roe = 0.0
-    final_average_roc = 0.0
+    final_average_roe = -1.0
+    final_average_roc = -1.0
     pe = None
     debtOnCapital = None
     try:
@@ -134,6 +134,8 @@ for symbol in filtered_symbollist:
         if debtOnEquity is not None:
             debtOnCapital = debtOnEquity / (debtOnEquity + 1)
             final_average_roc = final_average_roe * (1 - debtOnCapital)
+        else:
+            debtOnCapital = -1
 
     except Exception as e:
         print(f"Error fetching data for symbol {symbol} in financial_ratio: {str(e)}")
