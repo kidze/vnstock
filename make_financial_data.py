@@ -19,11 +19,12 @@ filtered_symbollist = [symbol for symbol in symbollist if len(symbol) <= 4]
 financial_data = []  # List to store the financial data objects
 
 # Limit the number of stocks
-filtered_symbollist = ['VIC','CTS','VPG','DGC','DHC','DGW','DGC','HPG','CTR','VCS','CAP','RAL','DHA','FPT','TCB','FTS','VIX']
+filtered_symbollist = ['VIC','CTS','VPG','DGC','DHC','DGW','DGC','HPG','CTR','VCS','CAP','RAL','DHA','FPT','TCB','FTS','VIX','VTP']
 
 for symbol in filtered_symbollist:
     net_income = {}
-    compound_rate = {}
+    compount_rate_5y = {}
+    compount_rate_7y = {}
     industry = ""
     dividend_yield = 0.0  # Default value for dividend_yield
     try:
@@ -54,33 +55,52 @@ for symbol in filtered_symbollist:
         # del net_income["CHỈ TIÊU"]
         # years = list(net_income.keys())[5:]
 
-        # compound_rate = {}
+        # compount_rate_5y = {}
 
         # for year in years:
         #     year_int = int(year)
         #     sum_net_income_5_years = sum(
         #         net_income[str(y)] for y in range(year_int - 5, year_int)
         #     )
-        #     compound_rate[year] = (
+        #     compount_rate_5y[year] = (
         #         net_income[year] - net_income[str(year_int - 5)]
         #     ) / sum_net_income_5_years
-            
+
         data = financial_flow(symbol=symbol, report_type="incomestatement", report_range="yearly")
         data.index = data.index.str.replace("-Q5", "")
-        
+
         net_income_column = 'postTaxProfit'  # Update with the actual column name
-                
+
+        # calculate 5y compound rate of net income
         for year in data.index:
             year_int = int(year)
             net_income[year] = data.loc[year, net_income_column]
             if str(year_int - 5) in data.index:
                 sum_net_income_5_years = sum(data.loc[str(y), net_income_column] for y in range(year_int - 5, year_int))
                 if sum_net_income_5_years != 0:
-                    compound_rate[year] = (data.loc[year, net_income_column] - data.loc[str(year_int - 5), net_income_column]) / sum_net_income_5_years
+                    compount_rate_5y[year] = (data.loc[year, net_income_column] - data.loc[str(year_int - 5), net_income_column]) / sum_net_income_5_years
                 else:
-                    compound_rate[year] = 0  # Set compound rate to zero or another value if appropriate
+                    compount_rate_5y[year] = 0  # Set compound rate to zero or another value if appropriate
 
-        
+        # calculate 7y compound rate of net income
+        for year in data.index:
+            year_int = int(year)
+            net_income[year] = data.loc[year, net_income_column]
+            if str(year_int - 7) in data.index:
+                sum_net_income_7_years = sum(
+                    data.loc[str(y), net_income_column]
+                    for y in range(year_int - 7, year_int)
+                )
+                if sum_net_income_7_years != 0:
+                    compount_rate_7y[year] = (
+                        data.loc[year, net_income_column]
+                        - data.loc[str(year_int - 7), net_income_column]
+                    ) / sum_net_income_7_years
+                else:
+                    compount_rate_7y[year] = (
+                        0  # Set compound rate to zero or another value if appropriate
+                    )
+
     except Exception as e:
         print(f"Error fetching data for symbol {symbol} in financial_report: {str(e)}")
 
@@ -123,7 +143,8 @@ for symbol in filtered_symbollist:
             "ticker": symbol,
             "industry": industry,
             "net_income": net_income,
-            "compound_rate": compound_rate,
+            "compount_rate_5y": compount_rate_5y,
+            "compount_rate_7y": compount_rate_7y,
             "average_5y_roc": final_average_roc,
             "average_5y_roe": final_average_roe,
             "pe": pe,
@@ -134,7 +155,7 @@ for symbol in filtered_symbollist:
 
 # Process financial_data to calculate average_5y_compound_rate
 for entry in financial_data:
-    compound_rates = entry["compound_rate"]
+    compound_rates = entry["compount_rate_5y"]
     available_years = list(compound_rates.keys())
     if len(available_years) >= 5:
         latest_years = list(compound_rates.keys())[:5]
@@ -145,8 +166,26 @@ for entry in financial_data:
             average_5y_compound_rate = sum(available_rates) / len(available_rates)
         else:
             average_5y_compound_rate = 0  # Set a default value when there's no data
-    
+
     entry["average_5y_compound_rate"] = average_5y_compound_rate
+
+# Process financial_data to calculate average_7y_compound_rate
+for entry in financial_data:
+    compound_rates = entry["compount_rate_7y"]
+    available_years = list(compound_rates.keys())
+    if len(available_years) >= 7:
+        latest_years = list(compound_rates.keys())[:7]
+        average_7y_compound_rate = (
+            sum(compound_rates[year] for year in latest_years) / 7
+        )
+    else:
+        available_rates = [compound_rates[year] for year in available_years]
+        if len(available_rates) > 0:
+            average_7y_compound_rate = sum(available_rates) / len(available_rates)
+        else:
+            average_7y_compound_rate = 0  # Set a default value when there's no data
+
+    entry["average_7y_compound_rate"] = average_7y_compound_rate
 
 # sort financial_data based on the highest roc and average_5y_compound_rate
 financial_data = sorted(
