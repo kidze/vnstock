@@ -40,20 +40,11 @@ filtered_symbollist = [
     "MSN",
     "BSI",
     "ACB",
-    "HBS",
     "HCM",
-    "MBS",
-    "ORS",
-    "PSI",
     "SHS",
-    "SSI",
-    "TCI",
-    "TVS",
-    "VCI",
-    "VDS",
     "GMD",
-    "VND",
     "HAH",
+    "GEX",
 ]
 
 for symbol in filtered_symbollist:
